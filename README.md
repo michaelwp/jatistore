@@ -97,7 +97,7 @@ psql -U postgres -c "CREATE DATABASE jatistore;"
 ### 3. Environment Configuration
 ```bash
 cp env.example .env
-# Edit .env file with your database credentials
+# Edit .env file with your database credentials, JWT_SECRET, SALT, and ROUND
 ```
 
 Example `.env` configuration:
@@ -111,6 +111,8 @@ PORT=8080
 ENVIRONMENT=development
 LOG_LEVEL=info
 JWT_SECRET=your-secret-key-here
+SALT=your-random-salt-string
+ROUND=12
 ```
 
 ### 4. Generate API Documentation
@@ -222,6 +224,17 @@ Authorization: Bearer <jwt_token>
 
 ## 🔐 Authentication & Authorization
 
+### User Password Policy
+- **Minimum 8 characters**
+- **At least 1 numeric character**
+- **At least 1 symbol**
+- **At least 1 uppercase letter**
+- Passwords are hashed using bcrypt with a configurable cost (rounds) and a secret salt from the environment.
+
+### Password Hashing Configuration
+- **SALT**: A secret string from the environment, prepended to the password before hashing.
+- **ROUND**: Bcrypt cost (number of hashing rounds, default: 12). Set in the environment.
+
 ### User Roles
 - **admin**: Full access to all features including user management
 - **user**: Standard access to POS features
@@ -294,7 +307,8 @@ curl -X POST http://localhost:8080/api/v1/products \
   -d '{
     "name": "iPhone 15",
     "description": "Latest iPhone model with advanced features",
-    "sku": "IPHONE-15-128GB",
+    "sku": "IPHONE-15-128GB",           # Optional
+    "barcode_number": "1234567890123",  # Optional, EAN/UPC/QR/barcode
     "category_id": "category-uuid-here",
     "price": 999.99
   }'
@@ -410,7 +424,15 @@ The application automatically creates the following tables with proper relations
 ### Core Tables
 - **users**: User accounts with authentication and role management
 - **categories**: Product categories with unique names
-- **products**: Product information linked to categories
+- **products**: Product information linked to categories. Fields:
+  - `id` (UUID): Product ID
+  - `name` (string): Product name (required)
+  - `description` (string): Product description
+  - `sku` (string): Stock Keeping Unit (optional, unique if provided)
+  - `barcode_number` (string): Barcode number (optional, EAN/UPC/QR/barcode)
+  - `category_id` (UUID): Linked category (required)
+  - `price` (float): Product price (required)
+  - `created_at`, `updated_at` (timestamp)
 - **inventory**: Stock levels and locations (unique constraint on product_id + location)
 - **inventory_transactions**: Complete audit trail of all stock movements
 - **customers**: Customer information with unique email addresses
@@ -841,6 +863,8 @@ The application follows clean architecture principles:
 | `ENVIRONMENT` | Application environment      | `development`| No       |
 | `LOG_LEVEL`   | Logging level                | `info`       | No       |
 | `JWT_SECRET`  | JWT signing secret           | `your-secret-key` | No |
+| `SALT`        | Bcrypt salt for password hashing | (set your own) | Yes |
+| `ROUND`       | Bcrypt cost (rounds)         | `12`         | No |
 
 ## 🤝 Contributing
 

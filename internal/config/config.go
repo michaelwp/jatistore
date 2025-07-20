@@ -14,6 +14,7 @@ type Config struct {
 	DatabaseURL string
 	Port        string
 	Environment string
+	BaseURL     string
 }
 
 func New() *Config {
@@ -25,6 +26,7 @@ func New() *Config {
 		DBName:      getEnv("DB_NAME", "jatistore"),
 		Port:        getEnv("PORT", "8080"),
 		Environment: getEnv("ENVIRONMENT", "development"),
+		BaseURL:     getEnv("BASE_URL", ""),
 	}
 	cfg.DatabaseURL = cfg.buildDatabaseURL()
 	return cfg

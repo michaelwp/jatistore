@@ -236,6 +236,11 @@
         },
         "/auth/register": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Register a new user account",
                 "consumes": [
                     "application/json"
@@ -248,6 +253,13 @@
                 ],
                 "summary": "Register a new user",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "User registration data",
                         "name": "user",
@@ -2329,10 +2341,12 @@
             "required": [
                 "category_id",
                 "name",
-                "price",
-                "sku"
+                "price"
             ],
             "properties": {
+                "barcode_number": {
+                    "type": "string"
+                },
                 "category_id": {
                     "type": "string"
                 },
@@ -2603,6 +2617,9 @@
         "models.Product": {
             "type": "object",
             "properties": {
+                "barcode_number": {
+                    "type": "string"
+                },
                 "category": {
                     "$ref": "#/definitions/models.Category"
                 },
@@ -2745,10 +2762,12 @@
             "required": [
                 "category_id",
                 "name",
-                "price",
-                "sku"
+                "price"
             ],
             "properties": {
+                "barcode_number": {
+                    "type": "string"
+                },
                 "category_id": {
                     "type": "string"
                 },
