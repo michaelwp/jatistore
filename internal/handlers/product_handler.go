@@ -46,17 +46,17 @@ func (h *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 		})
 	}
 
-	if req.SKU == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(models.APIResponse{
-			Success: false,
-			Error:   "Product SKU is required",
-		})
-	}
-
 	if req.Price < 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIResponse{
 			Success: false,
 			Error:   "Product price cannot be negative",
+		})
+	}
+
+	if req.CategoryID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIResponse{
+			Success: false,
+			Error:   "Category ID is required",
 		})
 	}
 
@@ -171,17 +171,17 @@ func (h *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 		})
 	}
 
-	if req.SKU == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(models.APIResponse{
-			Success: false,
-			Error:   "Product SKU is required",
-		})
-	}
-
 	if req.Price < 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(models.APIResponse{
 			Success: false,
 			Error:   "Product price cannot be negative",
+		})
+	}
+
+	if req.CategoryID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(models.APIResponse{
+			Success: false,
+			Error:   "Category ID is required",
 		})
 	}
 

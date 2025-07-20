@@ -134,6 +134,8 @@ definitions:
     type: object
   models.CreateProductRequest:
     properties:
+      barcode_number:
+        type: string
       category_id:
         type: string
       description:
@@ -149,7 +151,6 @@ definitions:
     - category_id
     - name
     - price
-    - sku
     type: object
   models.Customer:
     properties:
@@ -319,6 +320,8 @@ definitions:
     type: object
   models.Product:
     properties:
+      barcode_number:
+        type: string
       category:
         $ref: '#/definitions/models.Category'
       category_id:
@@ -414,6 +417,8 @@ definitions:
     type: object
   models.UpdateProductRequest:
     properties:
+      barcode_number:
+        type: string
       category_id:
         type: string
       description:
@@ -429,7 +434,6 @@ definitions:
     - category_id
     - name
     - price
-    - sku
     type: object
   models.UpdateUserRequest:
     properties:
@@ -620,6 +624,11 @@ paths:
       - application/json
       description: Register a new user account
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: User registration data
         in: body
         name: user
@@ -646,6 +655,8 @@ paths:
           description: Conflict
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Register a new user
       tags:
       - auth

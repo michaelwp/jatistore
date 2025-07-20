@@ -21,8 +21,8 @@ func NewProductRepository(db *database.DB) *ProductRepository {
 
 func (r *ProductRepository) Create(product *models.Product) error {
 	query := `
-		INSERT INTO products (id, name, description, sku, category_id, price, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		INSERT INTO products (id, name, description, sku, barcode_number, category_id, price, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 	`
 
 	now := time.Now()
@@ -35,6 +35,7 @@ func (r *ProductRepository) Create(product *models.Product) error {
 		product.Name,
 		product.Description,
 		product.SKU,
+		product.BarcodeNumber,
 		product.CategoryID,
 		product.Price,
 		product.CreatedAt,
@@ -50,7 +51,7 @@ func (r *ProductRepository) Create(product *models.Product) error {
 
 func (r *ProductRepository) GetByID(id uuid.UUID) (*models.Product, error) {
 	query := `
-		SELECT p.id, p.name, p.description, p.sku, p.category_id, p.price, p.created_at, p.updated_at,
+		SELECT p.id, p.name, p.description, p.sku, p.barcode_number, p.category_id, p.price, p.created_at, p.updated_at,
 		       c.id, c.name, c.description, c.created_at, c.updated_at
 		FROM products p
 		LEFT JOIN categories c ON p.category_id = c.id
@@ -65,6 +66,7 @@ func (r *ProductRepository) GetByID(id uuid.UUID) (*models.Product, error) {
 		&product.Name,
 		&product.Description,
 		&product.SKU,
+		&product.BarcodeNumber,
 		&product.CategoryID,
 		&product.Price,
 		&product.CreatedAt,
@@ -89,7 +91,7 @@ func (r *ProductRepository) GetByID(id uuid.UUID) (*models.Product, error) {
 
 func (r *ProductRepository) GetAll() ([]*models.Product, error) {
 	query := `
-		SELECT p.id, p.name, p.description, p.sku, p.category_id, p.price, p.created_at, p.updated_at,
+		SELECT p.id, p.name, p.description, p.sku, p.barcode_number, p.category_id, p.price, p.created_at, p.updated_at,
 		       c.id, c.name, c.description, c.created_at, c.updated_at
 		FROM products p
 		LEFT JOIN categories c ON p.category_id = c.id
@@ -112,6 +114,7 @@ func (r *ProductRepository) GetAll() ([]*models.Product, error) {
 			&product.Name,
 			&product.Description,
 			&product.SKU,
+			&product.BarcodeNumber,
 			&product.CategoryID,
 			&product.Price,
 			&product.CreatedAt,
@@ -137,8 +140,8 @@ func (r *ProductRepository) GetAll() ([]*models.Product, error) {
 func (r *ProductRepository) Update(product *models.Product) error {
 	query := `
 		UPDATE products 
-		SET name = $1, description = $2, sku = $3, category_id = $4, price = $5, updated_at = $6
-		WHERE id = $7
+		SET name = $1, description = $2, sku = $3, barcode_number = $4, category_id = $5, price = $6, updated_at = $7
+		WHERE id = $8
 	`
 
 	product.UpdatedAt = time.Now()
@@ -147,6 +150,7 @@ func (r *ProductRepository) Update(product *models.Product) error {
 		product.Name,
 		product.Description,
 		product.SKU,
+		product.BarcodeNumber,
 		product.CategoryID,
 		product.Price,
 		product.UpdatedAt,
@@ -191,7 +195,7 @@ func (r *ProductRepository) Delete(id uuid.UUID) error {
 
 func (r *ProductRepository) GetBySKU(sku string) (*models.Product, error) {
 	query := `
-		SELECT p.id, p.name, p.description, p.sku, p.category_id, p.price, p.created_at, p.updated_at,
+		SELECT p.id, p.name, p.description, p.sku, p.barcode_number, p.category_id, p.price, p.created_at, p.updated_at,
 		       c.id, c.name, c.description, c.created_at, c.updated_at
 		FROM products p
 		LEFT JOIN categories c ON p.category_id = c.id
@@ -206,6 +210,7 @@ func (r *ProductRepository) GetBySKU(sku string) (*models.Product, error) {
 		&product.Name,
 		&product.Description,
 		&product.SKU,
+		&product.BarcodeNumber,
 		&product.CategoryID,
 		&product.Price,
 		&product.CreatedAt,

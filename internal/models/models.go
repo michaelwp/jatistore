@@ -9,15 +9,16 @@ import (
 
 // Product represents a product in the inventory system
 type Product struct {
-	ID          uuid.UUID `json:"id" db:"id"`
-	Name        string    `json:"name" db:"name"`
-	Description string    `json:"description" db:"description"`
-	SKU         string    `json:"sku" db:"sku"`
-	CategoryID  uuid.UUID `json:"category_id" db:"category_id"`
-	Price       float64   `json:"price" db:"price"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
-	Category    *Category `json:"category,omitempty"`
+	ID            uuid.UUID `json:"id" db:"id"`
+	Name          string    `json:"name" db:"name"`
+	Description   string    `json:"description" db:"description"`
+	SKU           string    `json:"sku" db:"sku"`
+	BarcodeNumber string    `json:"barcode_number" db:"barcode_number"`
+	CategoryID    uuid.UUID `json:"category_id" db:"category_id"`
+	Price         float64   `json:"price" db:"price"`
+	CreatedAt     time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at" db:"updated_at"`
+	Category      *Category `json:"category,omitempty"`
 }
 
 // Category represents a product category
@@ -120,20 +121,22 @@ type Receipt struct {
 
 // CreateProductRequest represents the request to create a product
 type CreateProductRequest struct {
-	Name        string  `json:"name" validate:"required"`
-	Description string  `json:"description"`
-	SKU         string  `json:"sku" validate:"required"`
-	CategoryID  string  `json:"category_id" validate:"required"`
-	Price       float64 `json:"price" validate:"required,min=0"`
+	Name          string  `json:"name" validate:"required"`
+	Description   string  `json:"description"`
+	SKU           string  `json:"sku"`
+	BarcodeNumber string  `json:"barcode_number"`
+	CategoryID    string  `json:"category_id" validate:"required"`
+	Price         float64 `json:"price" validate:"required,min=0"`
 }
 
 // UpdateProductRequest represents the request to update a product
 type UpdateProductRequest struct {
-	Name        string  `json:"name" validate:"required"`
-	Description string  `json:"description"`
-	SKU         string  `json:"sku" validate:"required"`
-	CategoryID  string  `json:"category_id" validate:"required"`
-	Price       float64 `json:"price" validate:"required,min=0"`
+	Name          string  `json:"name" validate:"required"`
+	Description   string  `json:"description"`
+	SKU           string  `json:"sku"`
+	BarcodeNumber string  `json:"barcode_number"`
+	CategoryID    string  `json:"category_id" validate:"required"`
+	Price         float64 `json:"price" validate:"required,min=0"`
 }
 
 // CreateCategoryRequest represents the request to create a category

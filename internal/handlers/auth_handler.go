@@ -25,10 +25,12 @@ func NewAuthHandler(userService *services.UserService) *AuthHandler {
 // @Tags auth
 // @Accept json
 // @Produce json
+// @Param Authorization header string true "Bearer token"  // <-- required header
 // @Param user body models.RegisterRequest true "User registration data"
 // @Success 201 {object} models.APIResponse{data=models.User}
 // @Failure 400 {object} models.APIResponse
 // @Failure 409 {object} models.APIResponse
+// @Security BearerAuth
 // @Router /auth/register [post]
 func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	var req models.RegisterRequest

@@ -26,18 +26,21 @@ func (s *ProductService) CreateProduct(req *models.CreateProductRequest) (*model
 		return nil, fmt.Errorf("invalid category ID: %w", err)
 	}
 
-	// Check if SKU already exists
-	existingProduct, _ := s.productRepo.GetBySKU(req.SKU)
-	if existingProduct != nil {
-		return nil, fmt.Errorf("product with SKU %s already exists", req.SKU)
+	// Check if SKU already exists (only if SKU is provided)
+	if req.SKU != "" {
+		existingProduct, _ := s.productRepo.GetBySKU(req.SKU)
+		if existingProduct != nil {
+			return nil, fmt.Errorf("product with SKU %s already exists", req.SKU)
+		}
 	}
 
 	product := &models.Product{
-		Name:        req.Name,
-		Description: req.Description,
-		SKU:         req.SKU,
-		CategoryID:  categoryID,
-		Price:       req.Price,
+		Name:          req.Name,
+		Description:   req.Description,
+		SKU:           req.SKU,
+		BarcodeNumber: req.BarcodeNumber,
+		CategoryID:    categoryID,
+		Price:         req.Price,
 	}
 
 	if err := s.productRepo.Create(product); err != nil {
@@ -94,8 +97,8 @@ func (s *ProductService) UpdateProduct(id string, req *models.UpdateProductReque
 		return nil, fmt.Errorf("failed to get existing product: %w", err)
 	}
 
-	// Check if SKU is being changed and if it already exists
-	if existingProduct.SKU != req.SKU {
+	// Check if SKU is being changed and if it already exists (only if SKU is provided)
+	if req.SKU != "" && existingProduct.SKU != req.SKU {
 		productWithSKU, _ := s.productRepo.GetBySKU(req.SKU)
 		if productWithSKU != nil && productWithSKU.ID != productID {
 			return nil, fmt.Errorf("product with SKU %s already exists", req.SKU)
@@ -106,6 +109,7 @@ func (s *ProductService) UpdateProduct(id string, req *models.UpdateProductReque
 	existingProduct.Name = req.Name
 	existingProduct.Description = req.Description
 	existingProduct.SKU = req.SKU
+	existingProduct.BarcodeNumber = req.BarcodeNumber
 	existingProduct.CategoryID = categoryID
 	existingProduct.Price = req.Price
 

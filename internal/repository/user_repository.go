@@ -3,6 +3,9 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"os"
+	"regexp"
+	"strconv"
 	"time"
 
 	"jatistore/internal/database"
@@ -22,10 +25,45 @@ func NewUserRepository(db *database.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
+func validatePasswordRules(password string) error {
+	if len(password) < 8 {
+		return errors.New("password must be at least 8 characters")
+	}
+	if match, _ := regexp.MatchString(`[0-9]`, password); !match {
+		return errors.New("password must contain at least one numeric character")
+	}
+	if match, _ := regexp.MatchString(`[A-Z]`, password); !match {
+		return errors.New("password must contain at least one uppercase letter")
+	}
+	if match, _ := regexp.MatchString(`[^a-zA-Z0-9]`, password); !match {
+		return errors.New("password must contain at least one symbol")
+	}
+	return nil
+}
+
+func getBcryptCost() int {
+	costStr := os.Getenv("ROUND")
+	if costStr == "" {
+		return 12
+	}
+	cost, err := strconv.Atoi(costStr)
+	if err != nil || cost < bcrypt.MinCost || cost > bcrypt.MaxCost {
+		return 12
+	}
+	return cost
+}
+
 // CreateUser creates a new user in the database
 func (r *UserRepository) CreateUser(user *models.User) error {
-	// Hash the password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err := validatePasswordRules(user.Password); err != nil {
+		return err
+	}
+	// Use SALT from env
+	salt := os.Getenv("SALT")
+	passwordWithSalt := salt + user.Password
+	cost := getBcryptCost()
+	// Hash the password with bcrypt cost from env
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(passwordWithSalt), cost)
 	if err != nil {
 		return err
 	}
@@ -170,7 +208,15 @@ func (r *UserRepository) UpdateUser(user *models.User) error {
 
 // UpdatePassword updates a user's password
 func (r *UserRepository) UpdatePassword(userID uuid.UUID, newPassword string) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err := validatePasswordRules(newPassword); err != nil {
+		return err
+	}
+	// Use SALT from env
+	salt := os.Getenv("SALT")
+	passwordWithSalt := salt + newPassword
+	cost := getBcryptCost()
+	// Hash the password with bcrypt cost from env
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(passwordWithSalt), cost)
 	if err != nil {
 		return err
 	}
@@ -215,6 +261,7 @@ func (r *UserRepository) DeleteUser(id uuid.UUID) error {
 
 // CheckPassword verifies if the provided password matches the user's password
 func (r *UserRepository) CheckPassword(user *models.User, password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	return err == nil
+	salt := os.Getenv("SALT")
+	passwordWithSalt := salt + password
+	return bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(passwordWithSalt)) == nil
 }
