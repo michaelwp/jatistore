@@ -108,6 +108,28 @@ CREATE TABLE users (
 5. **Account Status**: Users can be deactivated without deletion
 6. **Unique Constraints**: Username and email must be unique
 
+## 🔑 Password Policy
+
+User passwords must meet the following requirements:
+- Minimum 8 characters
+- At least 1 numeric character
+- At least 1 symbol
+- At least 1 uppercase letter
+
+If the password does not meet these requirements, registration or password change will fail.
+
+## 🔒 Password Hashing Configuration
+
+- **SALT**: A secret string from the environment, prepended to the password before hashing. Set `SALT` in your `.env` file.
+- **ROUND**: Bcrypt cost (number of hashing rounds, default: 12). Set `ROUND` in your `.env` file.
+- Passwords are hashed as: `bcrypt(SALT + password, cost=ROUND)`
+
+Example `.env`:
+```env
+SALT=your-random-salt-string
+ROUND=12
+```
+
 ## Usage Examples
 
 ### 1. Register a New User
