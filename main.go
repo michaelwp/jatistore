@@ -10,6 +10,10 @@ package main
 // @contact.email support@jatistore.local
 // @host localhost:8080
 // @BasePath /api/v1
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 
 import (
 	"log"
@@ -51,6 +55,7 @@ func main() {
 	}
 
 	// Initialize repositories
+	userRepo := repository.NewUserRepository(db)
 	productRepo := repository.NewProductRepository(db)
 	categoryRepo := repository.NewCategoryRepository(db)
 	inventoryRepo := repository.NewInventoryRepository(db)
@@ -60,6 +65,7 @@ func main() {
 	receiptRepo := repository.NewReceiptRepository(db)
 
 	// Initialize services
+	userService := services.NewUserService(userRepo)
 	productService := services.NewProductService(productRepo)
 	categoryService := services.NewCategoryService(categoryRepo)
 	inventoryService := services.NewInventoryService(inventoryRepo)
@@ -67,14 +73,18 @@ func main() {
 	orderService := services.NewOrderService(orderRepo, productRepo, customerRepo, paymentRepo, receiptRepo)
 
 	// Initialize handlers
+	authHandler := handlers.NewAuthHandler(userService)
 	productHandler := handlers.NewProductHandler(productService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	inventoryHandler := handlers.NewInventoryHandler(inventoryService)
 	customerHandler := handlers.NewCustomerHandler(customerService)
 	orderHandler := handlers.NewOrderHandler(orderService)
 
+	// Initialize authentication middleware
+	authMiddleware := middleware.NewAuthMiddleware(userService)
+
 	// Create handlers instance
-	handlers := router.NewHandlers(productHandler, categoryHandler, inventoryHandler, customerHandler, orderHandler)
+	handlers := router.NewHandlers(authHandler, productHandler, categoryHandler, inventoryHandler, customerHandler, orderHandler)
 
 	// Create Fiber app
 	app := fiber.New(fiber.Config{
@@ -82,7 +92,7 @@ func main() {
 	})
 
 	// Setup routes
-	router.SetupRoutes(app, handlers)
+	router.SetupRoutes(app, handlers, authMiddleware)
 
 	// Start server
 	port := os.Getenv("PORT")
