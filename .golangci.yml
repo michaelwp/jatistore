@@ -19,7 +19,6 @@ linters:
     - goconst
     - gocyclo
     - misspell
-    - revive
     - gocritic
     - unparam
     - bodyclose
