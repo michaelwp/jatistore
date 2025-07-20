@@ -54,6 +54,20 @@ definitions:
     required:
     - name
     type: object
+  models.CreateCustomerRequest:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    required:
+    - email
+    - name
+    type: object
   models.CreateInventoryRequest:
     properties:
       location:
@@ -67,6 +81,45 @@ definitions:
     - location
     - product_id
     - quantity
+    type: object
+  models.CreateOrderRequest:
+    properties:
+      customer_id:
+        type: string
+      discount_amount:
+        type: number
+      items:
+        items:
+          $ref: '#/definitions/models.OrderItemRequest'
+        minItems: 1
+        type: array
+      notes:
+        type: string
+      tax_amount:
+        type: number
+    required:
+    - items
+    type: object
+  models.CreatePaymentRequest:
+    properties:
+      amount:
+        minimum: 0
+        type: number
+      order_id:
+        type: string
+      payment_method:
+        enum:
+        - cash
+        - card
+        - transfer
+        - digital_wallet
+        type: string
+      reference:
+        type: string
+    required:
+    - amount
+    - order_id
+    - payment_method
     type: object
   models.CreateProductRequest:
     properties:
@@ -86,6 +139,23 @@ definitions:
     - name
     - price
     - sku
+    type: object
+  models.Customer:
+    properties:
+      address:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      updated_at:
+        type: string
     type: object
   models.Inventory:
     properties:
@@ -113,6 +183,7 @@ definitions:
       product:
         $ref: '#/definitions/models.Product'
       product_id:
+        description: changed from uuid.UUID to string
         type: string
       quantity:
         type: integer
@@ -122,6 +193,100 @@ definitions:
         type: string
       type:
         description: '"in", "out", "adjustment"'
+        type: string
+    type: object
+  models.Order:
+    properties:
+      created_at:
+        type: string
+      customer:
+        $ref: '#/definitions/models.Customer'
+      customer_id:
+        type: string
+      discount_amount:
+        type: number
+      id:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/models.OrderItem'
+        type: array
+      notes:
+        type: string
+      order_number:
+        type: string
+      payment_status:
+        description: '"pending", "paid", "refunded"'
+        type: string
+      payments:
+        items:
+          $ref: '#/definitions/models.Payment'
+        type: array
+      status:
+        description: '"pending", "completed", "cancelled"'
+        type: string
+      subtotal:
+        type: number
+      tax_amount:
+        type: number
+      total_amount:
+        type: number
+      updated_at:
+        type: string
+    type: object
+  models.OrderItem:
+    properties:
+      created_at:
+        type: string
+      discount:
+        type: number
+      id:
+        type: string
+      order_id:
+        type: string
+      product:
+        $ref: '#/definitions/models.Product'
+      product_id:
+        type: string
+      quantity:
+        type: integer
+      total_price:
+        type: number
+      unit_price:
+        type: number
+    type: object
+  models.OrderItemRequest:
+    properties:
+      discount:
+        type: number
+      product_id:
+        type: string
+      quantity:
+        minimum: 1
+        type: integer
+    required:
+    - product_id
+    - quantity
+    type: object
+  models.Payment:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      id:
+        type: string
+      order_id:
+        type: string
+      payment_method:
+        description: '"cash", "card", "transfer", "digital_wallet"'
+        type: string
+      reference:
+        type: string
+      status:
+        description: '"pending", "completed", "failed", "refunded"'
+        type: string
+      updated_at:
         type: string
     type: object
   models.Product:
@@ -145,6 +310,23 @@ definitions:
       updated_at:
         type: string
     type: object
+  models.Receipt:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      order:
+        $ref: '#/definitions/models.Order'
+      order_id:
+        type: string
+      receipt_number:
+        type: string
+      tax_amount:
+        type: number
+      total_amount:
+        type: number
+    type: object
   models.UpdateCategoryRequest:
     properties:
       description:
@@ -152,6 +334,20 @@ definitions:
       name:
         type: string
     required:
+    - name
+    type: object
+  models.UpdateCustomerRequest:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    required:
+    - email
     - name
     type: object
   models.UpdateInventoryRequest:
@@ -189,9 +385,11 @@ info:
   contact:
     email: support@jatistore.local
     name: API Support
-  description: RESTful API for inventory management using Go, Fiber, and PostgreSQL.
-  title: JatiStore Inventory API
-  version: "1.0"
+  description: RESTful API for Point of Sales (POS) system using Go, Fiber, and PostgreSQL.
+    Includes inventory management, customer management, order processing, payments,
+    and receipts.
+  title: JatiStore POS API
+  version: "2.0"
 paths:
   /categories:
     get:
@@ -354,6 +552,236 @@ paths:
       summary: Update a category
       tags:
       - Categories
+  /customers:
+    get:
+      description: Get a list of all customers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Customer'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Get all customers
+      tags:
+      - customers
+    post:
+      consumes:
+      - application/json
+      description: Create a new customer with the provided information
+      parameters:
+      - description: Customer information
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCustomerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Customer'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Create a new customer
+      tags:
+      - customers
+  /customers/{customerId}/orders:
+    get:
+      description: Get all orders for a specific customer
+      parameters:
+      - description: Customer ID
+        in: path
+        name: customerId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Order'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Get orders by customer
+      tags:
+      - orders
+  /customers/{id}:
+    delete:
+      description: Delete a customer by ID
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Delete a customer
+      tags:
+      - customers
+    get:
+      description: Get customer details by customer ID
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Customer'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Get a customer by ID
+      tags:
+      - customers
+    put:
+      consumes:
+      - application/json
+      description: Update customer information by ID
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated customer information
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateCustomerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Customer'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Update a customer
+      tags:
+      - customers
+  /customers/search:
+    get:
+      description: Search customers by name, email, or phone
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Customer'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Search customers
+      tags:
+      - customers
   /inventory:
     get:
       consumes:
@@ -550,6 +978,221 @@ paths:
       summary: Adjust inventory stock
       tags:
       - Inventory
+  /orders:
+    get:
+      description: Get a list of all orders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Order'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Get all orders
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      description: Create a new sales order with items
+      parameters:
+      - description: Order information
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Order'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Create a new order
+      tags:
+      - orders
+  /orders/{id}:
+    get:
+      description: Get order details by order ID
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Order'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Get an order by ID
+      tags:
+      - orders
+  /orders/{id}/payments:
+    post:
+      consumes:
+      - application/json
+      description: Process a payment for an order
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Payment information
+        in: body
+        name: payment
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Payment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Process payment for an order
+      tags:
+      - orders
+  /orders/{id}/receipt:
+    post:
+      description: Generate a receipt for a paid order
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Receipt'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Generate receipt for an order
+      tags:
+      - orders
+  /orders/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: Update the status of an order
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Order status
+        in: body
+        name: status
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Update order status
+      tags:
+      - orders
   /products:
     get:
       consumes:

@@ -1,8 +1,11 @@
+// Package main provides the entry point for the JatiStore POS API server.
+// This application serves as a comprehensive Point of Sales system with
+// inventory management, customer management, order processing, payments, and receipts.
 package main
 
-// @title JatiStore Inventory API
-// @version 1.0
-// @description RESTful API for inventory management using Go, Fiber, and PostgreSQL.
+// @title JatiStore POS API
+// @version 2.0
+// @description RESTful API for Point of Sales (POS) system using Go, Fiber, and PostgreSQL. Includes inventory management, customer management, order processing, payments, and receipts.
 // @contact.name API Support
 // @contact.email support@jatistore.local
 // @host localhost:8080
@@ -38,10 +41,12 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
-	defer db.Close()
 
 	// Create database tables
 	if err := db.CreateTables(); err != nil {
+		if closeErr := db.Close(); closeErr != nil {
+			log.Printf("Error closing database connection: %v", closeErr)
+		}
 		log.Fatal("Failed to create database tables:", err)
 	}
 
@@ -49,19 +54,27 @@ func main() {
 	productRepo := repository.NewProductRepository(db)
 	categoryRepo := repository.NewCategoryRepository(db)
 	inventoryRepo := repository.NewInventoryRepository(db)
+	customerRepo := repository.NewCustomerRepository(db)
+	orderRepo := repository.NewOrderRepository(db)
+	paymentRepo := repository.NewPaymentRepository(db)
+	receiptRepo := repository.NewReceiptRepository(db)
 
 	// Initialize services
 	productService := services.NewProductService(productRepo)
 	categoryService := services.NewCategoryService(categoryRepo)
 	inventoryService := services.NewInventoryService(inventoryRepo)
+	customerService := services.NewCustomerService(customerRepo)
+	orderService := services.NewOrderService(orderRepo, productRepo, customerRepo, paymentRepo, receiptRepo)
 
 	// Initialize handlers
 	productHandler := handlers.NewProductHandler(productService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	inventoryHandler := handlers.NewInventoryHandler(inventoryService)
+	customerHandler := handlers.NewCustomerHandler(customerService)
+	orderHandler := handlers.NewOrderHandler(orderService)
 
 	// Create handlers instance
-	handlers := router.NewHandlers(productHandler, categoryHandler, inventoryHandler)
+	handlers := router.NewHandlers(productHandler, categoryHandler, inventoryHandler, customerHandler, orderHandler)
 
 	// Create Fiber app
 	app := fiber.New(fiber.Config{
@@ -78,5 +91,11 @@ func main() {
 	}
 
 	log.Printf("Server starting on port %s", port)
-	log.Fatal(app.Listen(":" + port))
+	if err := app.Listen(":" + port); err != nil {
+		log.Printf("Server error: %v", err)
+		if closeErr := db.Close(); closeErr != nil {
+			log.Printf("Error closing database connection: %v", closeErr)
+		}
+		os.Exit(1)
+	}
 }
