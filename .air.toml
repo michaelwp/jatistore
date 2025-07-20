@@ -1,0 +1,29 @@
+# Air configuration for Go hot reload
+
+# Working directory
+root = "."
+
+# Build settings
+[build]
+  cmd = "go build -o bin/jatistore main.go"
+  bin = "bin/jatistore"
+  full_bin = ""
+  include_ext = [".go", ".tpl", ".tmpl", ".html"]
+  exclude_dir = ["bin", "docs", "vendor", ".git", "node_modules"]
+  exclude_file = []
+  follow_symlink = false
+  log = "build.log"
+  delay = 1000 # ms
+  send_interrupt = true
+  kill_delay = 500 # ms
+
+# Run settings
+[run]
+  cmd = ""
+  bin = "bin/jatistore"
+  args = []
+  env = ["GO_ENV=development"]
+  env_file = ".env"
+  log = ""
+  restart_on_error = true
+  stop_on_error = false 

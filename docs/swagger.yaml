@@ -1,0 +1,714 @@
+basePath: /api/v1
+definitions:
+  models.APIResponse:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  models.AdjustStockRequest:
+    properties:
+      product_id:
+        type: string
+      quantity:
+        type: integer
+      reason:
+        type: string
+      reference:
+        type: string
+      type:
+        enum:
+        - in
+        - out
+        - adjustment
+        type: string
+    required:
+    - product_id
+    - quantity
+    - reason
+    - type
+    type: object
+  models.Category:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.CreateCategoryRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  models.CreateInventoryRequest:
+    properties:
+      location:
+        type: string
+      product_id:
+        type: string
+      quantity:
+        minimum: 0
+        type: integer
+    required:
+    - location
+    - product_id
+    - quantity
+    type: object
+  models.CreateProductRequest:
+    properties:
+      category_id:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        minimum: 0
+        type: number
+      sku:
+        type: string
+    required:
+    - category_id
+    - name
+    - price
+    - sku
+    type: object
+  models.Inventory:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      location:
+        type: string
+      product:
+        $ref: '#/definitions/models.Product'
+      product_id:
+        type: string
+      quantity:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.InventoryTransaction:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      product:
+        $ref: '#/definitions/models.Product'
+      product_id:
+        type: string
+      quantity:
+        type: integer
+      reason:
+        type: string
+      reference:
+        type: string
+      type:
+        description: '"in", "out", "adjustment"'
+        type: string
+    type: object
+  models.Product:
+    properties:
+      category:
+        $ref: '#/definitions/models.Category'
+      category_id:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      sku:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.UpdateCategoryRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  models.UpdateInventoryRequest:
+    properties:
+      location:
+        type: string
+      quantity:
+        minimum: 0
+        type: integer
+    required:
+    - location
+    - quantity
+    type: object
+  models.UpdateProductRequest:
+    properties:
+      category_id:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        minimum: 0
+        type: number
+      sku:
+        type: string
+    required:
+    - category_id
+    - name
+    - price
+    - sku
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@jatistore.local
+    name: API Support
+  description: RESTful API for inventory management using Go, Fiber, and PostgreSQL.
+  title: JatiStore Inventory API
+  version: "1.0"
+paths:
+  /categories:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Category'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Get all categories
+      tags:
+      - Categories
+    post:
+      consumes:
+      - application/json
+      description: Create a new category with the provided data
+      parameters:
+      - description: Category data
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Category'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Create a new category
+      tags:
+      - Categories
+  /categories/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a category by its ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Delete a category
+      tags:
+      - Categories
+    get:
+      consumes:
+      - application/json
+      description: Get a category by its unique identifier
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Category'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Get category by ID
+      tags:
+      - Categories
+    put:
+      consumes:
+      - application/json
+      description: Update a category with the provided data
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated category data
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Category'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Update a category
+      tags:
+      - Categories
+  /inventory:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all inventory records
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Inventory'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Get all inventory records
+      tags:
+      - Inventory
+    post:
+      consumes:
+      - application/json
+      description: Create a new inventory record with the provided data
+      parameters:
+      - description: Inventory data
+        in: body
+        name: inventory
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateInventoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Inventory'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Create a new inventory record
+      tags:
+      - Inventory
+  /inventory/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an inventory record by its ID
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Delete an inventory record
+      tags:
+      - Inventory
+    get:
+      consumes:
+      - application/json
+      description: Get an inventory record by its unique identifier
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Inventory'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Get inventory by ID
+      tags:
+      - Inventory
+    put:
+      consumes:
+      - application/json
+      description: Update an inventory record with the provided data
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated inventory data
+        in: body
+        name: inventory
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateInventoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Inventory'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Update an inventory record
+      tags:
+      - Inventory
+  /inventory/adjust:
+    post:
+      consumes:
+      - application/json
+      description: Adjust inventory stock levels (in/out/adjustment)
+      parameters:
+      - description: Stock adjustment data
+        in: body
+        name: adjustment
+        required: true
+        schema:
+          $ref: '#/definitions/models.AdjustStockRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.InventoryTransaction'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Adjust inventory stock
+      tags:
+      - Inventory
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Product'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Get all products
+      tags:
+      - Products
+    post:
+      consumes:
+      - application/json
+      description: Create a new product with the provided data
+      parameters:
+      - description: Product data
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Product'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Create a new product
+      tags:
+      - Products
+  /products/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a product by its ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Delete a product
+      tags:
+      - Products
+    get:
+      consumes:
+      - application/json
+      description: Get a product by its unique identifier
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Product'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Get product by ID
+      tags:
+      - Products
+    put:
+      consumes:
+      - application/json
+      description: Update a product with the provided data
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated product data
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Product'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.APIResponse'
+      summary: Update a product
+      tags:
+      - Products
+swagger: "2.0"
