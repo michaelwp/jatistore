@@ -57,6 +57,9 @@ The project includes a comprehensive `Makefile` for common development tasks:
 | `make swag`     | Generate Swagger API documentation into the `docs/` directory    |
 | `make tidy`     | Clean up and verify Go module dependencies                       |
 | `make clean`    | Remove the `bin/` and `docs/` directories                        |
+| `make lint`     | Run golangci-lint for code quality checks                        |
+| `make pre-commit` | Run pre-commit checks including linting                        |
+| `make install-hooks` | Install git hooks for automated checks                      |
 | `make migrate-up`   | Apply all database migrations (requires `migrate` tool)      |
 | `make migrate-down` | Roll back the last database migration (requires `migrate`)   |
 
