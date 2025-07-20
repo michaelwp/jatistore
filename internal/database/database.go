@@ -151,6 +151,18 @@ func (db *DB) CreateTables() error {
 			created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 		)`,
 
+		// Users table
+		`CREATE TABLE IF NOT EXISTS users (
+			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+			username VARCHAR(50) UNIQUE NOT NULL,
+			email VARCHAR(255) UNIQUE NOT NULL,
+			password VARCHAR(255) NOT NULL,
+			role VARCHAR(20) NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'user', 'cashier')),
+			is_active BOOLEAN NOT NULL DEFAULT true,
+			created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+			updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+		)`,
+
 		// Indexes
 		`CREATE INDEX IF NOT EXISTS idx_products_category_id ON products(category_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku)`,
@@ -167,6 +179,10 @@ func (db *DB) CreateTables() error {
 		`CREATE INDEX IF NOT EXISTS idx_payments_order_id ON payments(order_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status)`,
 		`CREATE INDEX IF NOT EXISTS idx_receipts_order_id ON receipts(order_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)`,
+		`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
+		`CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)`,
+		`CREATE INDEX IF NOT EXISTS idx_users_is_active ON users(is_active)`,
 
 		// Sequences for order and receipt numbers
 		`CREATE SEQUENCE IF NOT EXISTS order_number_seq START 1000`,
@@ -189,6 +205,15 @@ func (db *DB) CreateTables() error {
 		END;
 		$$ LANGUAGE plpgsql`,
 
+		// Function for updating updated_at timestamp
+		`CREATE OR REPLACE FUNCTION update_updated_at_column()
+		RETURNS TRIGGER AS $$
+		BEGIN
+			NEW.updated_at = NOW();
+			RETURN NEW;
+		END;
+		$$ language 'plpgsql'`,
+
 		// Triggers for automatic number generation
 		`DROP TRIGGER IF EXISTS trigger_generate_order_number ON orders`,
 		`CREATE TRIGGER trigger_generate_order_number
@@ -203,6 +228,13 @@ func (db *DB) CreateTables() error {
 			FOR EACH ROW
 			WHEN (NEW.receipt_number IS NULL OR NEW.receipt_number = '')
 			EXECUTE FUNCTION generate_receipt_number()`,
+
+		// Trigger for updating users updated_at timestamp
+		`DROP TRIGGER IF EXISTS update_users_updated_at ON users`,
+		`CREATE TRIGGER update_users_updated_at 
+			BEFORE UPDATE ON users 
+			FOR EACH ROW 
+			EXECUTE FUNCTION update_updated_at_column()`,
 	}
 
 	for _, query := range queries {
