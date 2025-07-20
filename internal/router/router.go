@@ -61,6 +61,27 @@ func SetupRoutes(app *fiber.App, handlers *Handlers) {
 	inventory.Put("/:id", handlers.InventoryHandler.UpdateInventory)
 	inventory.Delete("/:id", handlers.InventoryHandler.DeleteInventory)
 	inventory.Post("/adjust", handlers.InventoryHandler.AdjustStock)
+
+	// Customer routes
+	customers := api.Group("/customers")
+	customers.Get("/", handlers.CustomerHandler.GetAllCustomers)
+	customers.Get("/search", handlers.CustomerHandler.SearchCustomers)
+	customers.Get("/:id", handlers.CustomerHandler.GetCustomer)
+	customers.Post("/", handlers.CustomerHandler.CreateCustomer)
+	customers.Put("/:id", handlers.CustomerHandler.UpdateCustomer)
+	customers.Delete("/:id", handlers.CustomerHandler.DeleteCustomer)
+
+	// Order routes
+	orders := api.Group("/orders")
+	orders.Get("/", handlers.OrderHandler.GetAllOrders)
+	orders.Get("/:id", handlers.OrderHandler.GetOrder)
+	orders.Post("/", handlers.OrderHandler.CreateOrder)
+	orders.Put("/:id/status", handlers.OrderHandler.UpdateOrderStatus)
+	orders.Post("/:id/payments", handlers.OrderHandler.ProcessPayment)
+	orders.Post("/:id/receipt", handlers.OrderHandler.GenerateReceipt)
+
+	// Customer orders route
+	api.Get("/customers/:customerId/orders", handlers.OrderHandler.GetOrdersByCustomer)
 }
 
 // Handlers contains all the handlers for the application
@@ -68,6 +89,8 @@ type Handlers struct {
 	ProductHandler   *handlers.ProductHandler
 	CategoryHandler  *handlers.CategoryHandler
 	InventoryHandler *handlers.InventoryHandler
+	CustomerHandler  *handlers.CustomerHandler
+	OrderHandler     *handlers.OrderHandler
 }
 
 // NewHandlers creates a new Handlers instance
@@ -75,10 +98,14 @@ func NewHandlers(
 	productHandler *handlers.ProductHandler,
 	categoryHandler *handlers.CategoryHandler,
 	inventoryHandler *handlers.InventoryHandler,
+	customerHandler *handlers.CustomerHandler,
+	orderHandler *handlers.OrderHandler,
 ) *Handlers {
 	return &Handlers{
 		ProductHandler:   productHandler,
 		CategoryHandler:  categoryHandler,
 		InventoryHandler: inventoryHandler,
+		CustomerHandler:  customerHandler,
+		OrderHandler:     orderHandler,
 	}
 }
