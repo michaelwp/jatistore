@@ -4,6 +4,9 @@ A modern, robust Point of Sales system built with Go, PostgreSQL, and Fiber web 
 
 ## 🚀 Features
 
+- **🔐 User Authentication**: JWT-based authentication with role-based access control
+- **👥 User Management**: Complete user administration with admin, user, and cashier roles
+- **🔒 Secure Access**: All features protected by authentication with proper authorization
 - **Product Management**: Complete CRUD operations for products with category organization
 - **Category Management**: Hierarchical product categorization system
 - **Inventory Management**: Real-time stock level tracking across multiple locations
@@ -26,6 +29,8 @@ jatistore/
 ├── go.sum                  # Go module checksums
 ├── env.example             # Environment variables example
 ├── README.md               # This file
+├── AUTHENTICATION.md       # Authentication system documentation
+├── test_auth.sh           # Authentication testing script
 ├── Makefile                # Build and management commands
 ├── docs/                   # Swagger API documentation (auto-generated)
 │   ├── docs.go
@@ -105,6 +110,7 @@ DB_NAME=y_database
 PORT=8080
 ENVIRONMENT=development
 LOG_LEVEL=info
+JWT_SECRET=your-secret-key-here
 ```
 
 ### 4. Generate API Documentation
@@ -118,6 +124,27 @@ make run
 ```
 
 The server will start on `http://localhost:8080`
+
+### 6. Set Up Authentication
+```bash
+# Register your first admin user
+curl -X POST http://localhost:8080/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "email": "admin@jatistore.com",
+    "password": "admin123",
+    "role": "admin"
+  }'
+
+# Login to get JWT token
+curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "admin123"
+  }'
+```
 
 ## 📚 API Documentation
 
@@ -134,21 +161,41 @@ Here you can view and interact with the complete API documentation.
 ### Health Check
 - `GET /health` - Check if the API is running
 
-### Categories
+### Authentication (Public Endpoints)
+- `POST /api/v1/auth/register` - Register a new user account
+- `POST /api/v1/auth/login` - Login and get JWT token
+
+### Authentication (Protected Endpoints)
+All endpoints below require a valid JWT token in the Authorization header:
+```
+Authorization: Bearer <jwt_token>
+```
+
+- `GET /api/v1/auth/profile` - Get current user profile
+- `PUT /api/v1/auth/profile` - Update current user profile
+- `POST /api/v1/auth/change-password` - Change current user password
+
+### User Management (Admin Only)
+- `GET /api/v1/auth/users` - Get all users
+- `GET /api/v1/auth/users/:id` - Get user by ID
+- `PUT /api/v1/auth/users/:id` - Update user
+- `DELETE /api/v1/auth/users/:id` - Delete user
+
+### Categories (Authentication Required)
 - `GET /api/v1/categories` - Get all categories
 - `GET /api/v1/categories/:id` - Get category by ID
 - `POST /api/v1/categories` - Create a new category
 - `PUT /api/v1/categories/:id` - Update a category
 - `DELETE /api/v1/categories/:id` - Delete a category
 
-### Products
+### Products (Authentication Required)
 - `GET /api/v1/products` - Get all products
 - `GET /api/v1/products/:id` - Get product by ID
 - `POST /api/v1/products` - Create a new product
 - `PUT /api/v1/products/:id` - Update a product
 - `DELETE /api/v1/products/:id` - Delete a product
 
-### Inventory
+### Inventory (Authentication Required)
 - `GET /api/v1/inventory` - Get all inventory records
 - `GET /api/v1/inventory/:id` - Get inventory by ID
 - `POST /api/v1/inventory` - Create a new inventory record
@@ -156,7 +203,7 @@ Here you can view and interact with the complete API documentation.
 - `DELETE /api/v1/inventory/:id` - Delete an inventory record
 - `POST /api/v1/inventory/adjust` - Adjust stock levels and record transactions
 
-### Customers
+### Customers (Authentication Required)
 - `GET /api/v1/customers` - Get all customers
 - `GET /api/v1/customers/search` - Search customers by name, email, or phone
 - `GET /api/v1/customers/:id` - Get customer by ID
@@ -164,7 +211,7 @@ Here you can view and interact with the complete API documentation.
 - `PUT /api/v1/customers/:id` - Update a customer
 - `DELETE /api/v1/customers/:id` - Delete a customer
 
-### Orders
+### Orders (Authentication Required)
 - `GET /api/v1/orders` - Get all orders
 - `GET /api/v1/orders/:id` - Get order by ID
 - `POST /api/v1/orders` - Create a new order
@@ -173,11 +220,65 @@ Here you can view and interact with the complete API documentation.
 - `POST /api/v1/orders/:id/receipt` - Generate receipt for an order
 - `GET /api/v1/customers/:customerId/orders` - Get orders by customer
 
+## 🔐 Authentication & Authorization
+
+### User Roles
+- **admin**: Full access to all features including user management
+- **user**: Standard access to POS features
+- **cashier**: Access to order processing and basic features
+
+### Security Features
+- **JWT Tokens**: Secure token-based authentication with 24-hour expiration
+- **Password Hashing**: All passwords securely hashed using bcrypt
+- **Role-Based Access**: Server-side role validation for all protected routes
+- **Input Validation**: Comprehensive validation for all user inputs
+- **Account Management**: Users can be activated/deactivated without deletion
+
+### Authentication Flow
+1. **Register** a new user account (or login with existing credentials)
+2. **Login** to receive a JWT token
+3. **Include token** in all subsequent API requests
+4. **Token expires** after 24 hours (re-login required)
+
+For detailed authentication documentation, see [AUTHENTICATION.md](AUTHENTICATION.md).
+
 ## 💡 API Examples
+
+### Authentication Examples
+
+#### Register a New User
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "email": "admin@jatistore.com",
+    "password": "admin123",
+    "role": "admin"
+  }'
+```
+
+#### Login and Get Token
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "admin123"
+  }'
+```
+
+#### Access Protected Endpoint
+```bash
+curl -X GET http://localhost:8080/api/v1/products \
+  -H "Authorization: Bearer <your_jwt_token>" \
+  -H "Content-Type: application/json"
+```
 
 ### Create a Category
 ```bash
 curl -X POST http://localhost:8080/api/v1/categories \
+  -H "Authorization: Bearer <your_jwt_token>" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Electronics",
@@ -188,6 +289,7 @@ curl -X POST http://localhost:8080/api/v1/categories \
 ### Create a Product
 ```bash
 curl -X POST http://localhost:8080/api/v1/products \
+  -H "Authorization: Bearer <your_jwt_token>" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "iPhone 15",
@@ -201,6 +303,7 @@ curl -X POST http://localhost:8080/api/v1/products \
 ### Create Inventory Record
 ```bash
 curl -X POST http://localhost:8080/api/v1/inventory \
+  -H "Authorization: Bearer <your_jwt_token>" \
   -H "Content-Type: application/json" \
   -d '{
     "product_id": "product-uuid-here",
@@ -213,6 +316,7 @@ curl -X POST http://localhost:8080/api/v1/inventory \
 ```bash
 # Add stock (incoming shipment)
 curl -X POST http://localhost:8080/api/v1/inventory/adjust \
+  -H "Authorization: Bearer <your_jwt_token>" \
   -H "Content-Type: application/json" \
   -d '{
     "product_id": "product-uuid-here",
@@ -224,6 +328,7 @@ curl -X POST http://localhost:8080/api/v1/inventory/adjust \
 
 # Remove stock (sale or loss)
 curl -X POST http://localhost:8080/api/v1/inventory/adjust \
+  -H "Authorization: Bearer <your_jwt_token>" \
   -H "Content-Type: application/json" \
   -d '{
     "product_id": "product-uuid-here",
@@ -235,6 +340,7 @@ curl -X POST http://localhost:8080/api/v1/inventory/adjust \
 
 # Manual adjustment (stock count correction)
 curl -X POST http://localhost:8080/api/v1/inventory/adjust \
+  -H "Authorization: Bearer <your_jwt_token>" \
   -H "Content-Type: application/json" \
   -d '{
     "product_id": "product-uuid-here",
@@ -243,10 +349,12 @@ curl -X POST http://localhost:8080/api/v1/inventory/adjust \
     "reason": "Physical count correction",
     "reference": "STOCK-COUNT-2024-01"
   }'
+```
 
 ### Create a Customer
 ```bash
 curl -X POST http://localhost:8080/api/v1/customers \
+  -H "Authorization: Bearer <your_jwt_token>" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "John Doe",
@@ -259,6 +367,7 @@ curl -X POST http://localhost:8080/api/v1/customers \
 ### Create an Order
 ```bash
 curl -X POST http://localhost:8080/api/v1/orders \
+  -H "Authorization: Bearer <your_jwt_token>" \
   -H "Content-Type: application/json" \
   -d '{
     "customer_id": "customer-uuid-here",
@@ -278,6 +387,7 @@ curl -X POST http://localhost:8080/api/v1/orders \
 ### Process Payment
 ```bash
 curl -X POST http://localhost:8080/api/v1/orders/order-uuid-here/payments \
+  -H "Authorization: Bearer <your_jwt_token>" \
   -H "Content-Type: application/json" \
   -d '{
     "amount": 150.00,
@@ -289,8 +399,8 @@ curl -X POST http://localhost:8080/api/v1/orders/order-uuid-here/payments \
 ### Generate Receipt
 ```bash
 curl -X POST http://localhost:8080/api/v1/orders/order-uuid-here/receipt \
+  -H "Authorization: Bearer <your_jwt_token>" \
   -H "Content-Type: application/json"
-```
 ```
 
 ## 🗄️ Database Schema
@@ -298,6 +408,7 @@ curl -X POST http://localhost:8080/api/v1/orders/order-uuid-here/receipt \
 The application automatically creates the following tables with proper relationships and constraints:
 
 ### Core Tables
+- **users**: User accounts with authentication and role management
 - **categories**: Product categories with unique names
 - **products**: Product information linked to categories
 - **inventory**: Stock levels and locations (unique constraint on product_id + location)
@@ -316,6 +427,7 @@ The application automatically creates the following tables with proper relations
 - **Cascade Deletes**: Automatic cleanup of related records
 - **Automatic Numbering**: Order and receipt numbers generated automatically
 - **Transaction Support**: Database transactions for data consistency
+- **Password Security**: Bcrypt hashing for user passwords
 
 ## 🔄 Inventory Transactions
 
@@ -364,13 +476,35 @@ Here's a typical workflow for processing a sale in the POS system:
 
 ### 1. Setup (One-time)
 ```bash
+# Register admin user (if not already done)
+curl -X POST http://localhost:8080/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "email": "admin@jatistore.com",
+    "password": "admin123",
+    "role": "admin"
+  }'
+
+# Login to get token
+LOGIN_RESPONSE=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "admin123"
+  }')
+
+TOKEN=$(echo $LOGIN_RESPONSE | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+
 # Create categories
 curl -X POST http://localhost:8080/api/v1/categories \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name": "Electronics", "description": "Electronic devices"}'
 
 # Create products
 curl -X POST http://localhost:8080/api/v1/products \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "iPhone 15",
@@ -382,6 +516,7 @@ curl -X POST http://localhost:8080/api/v1/products \
 
 # Add inventory
 curl -X POST http://localhost:8080/api/v1/inventory \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "product_id": "product-uuid-here",
@@ -394,6 +529,7 @@ curl -X POST http://localhost:8080/api/v1/inventory \
 ```bash
 # Create customer (optional - can create anonymous orders)
 curl -X POST http://localhost:8080/api/v1/customers \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "John Doe",
@@ -406,6 +542,7 @@ curl -X POST http://localhost:8080/api/v1/customers \
 ### 3. Create Order
 ```bash
 curl -X POST http://localhost:8080/api/v1/orders \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "customer_id": "customer-uuid-here",
@@ -425,6 +562,7 @@ curl -X POST http://localhost:8080/api/v1/orders \
 ### 4. Process Payment
 ```bash
 curl -X POST http://localhost:8080/api/v1/orders/order-uuid-here/payments \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "amount": 1000.00,
@@ -436,12 +574,14 @@ curl -X POST http://localhost:8080/api/v1/orders/order-uuid-here/payments \
 ### 5. Generate Receipt
 ```bash
 curl -X POST http://localhost:8080/api/v1/orders/order-uuid-here/receipt \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json"
 ```
 
 ### 6. Update Order Status
 ```bash
 curl -X PUT http://localhost:8080/api/v1/orders/order-uuid-here/status \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"status": "completed"}'
 ```
@@ -449,6 +589,12 @@ curl -X PUT http://localhost:8080/api/v1/orders/order-uuid-here/status \
 ## 🛠️ Troubleshooting
 
 ### Common Issues
+
+#### Authentication Issues
+- **Error**: `Authorization header is required`
+- **Solution**: Include JWT token in Authorization header: `Authorization: Bearer <token>`
+- **Error**: `Invalid or expired token`
+- **Solution**: Re-login to get a new token (tokens expire after 24 hours)
 
 #### Database Connection Issues
 - **Error**: `failed to connect to database`
@@ -480,11 +626,12 @@ curl -X PUT http://localhost:8080/api/v1/orders/order-uuid-here/status \
 ### Production Deployment
 
 1. **Environment Variables**: Never commit `.env` files to version control
-2. **Database Security**: Use strong passwords and restrict database access
-3. **HTTPS**: Always use HTTPS in production
-4. **Rate Limiting**: Implement rate limiting for API endpoints
-5. **Authentication**: Add JWT or OAuth2 authentication for production use
-6. **Input Validation**: All inputs are validated, but consider additional sanitization
+2. **JWT Secret**: Use a strong, unique JWT secret in production
+3. **Database Security**: Use strong passwords and restrict database access
+4. **HTTPS**: Always use HTTPS in production
+5. **Rate Limiting**: Implement rate limiting for API endpoints
+6. **Authentication**: JWT authentication is already implemented
+7. **Input Validation**: All inputs are validated, but consider additional sanitization
 
 ### Data Backup
 
@@ -537,6 +684,7 @@ DB_NAME=jatistore
 PORT=8080
 ENVIRONMENT=production
 LOG_LEVEL=info
+JWT_SECRET=your-very-secure-jwt-secret-key
 ```
 
 ### Transaction Fields
@@ -580,7 +728,10 @@ All API endpoints return a consistent response format:
 - **200 OK**: Request successful
 - **201 Created**: Resource created successfully
 - **400 Bad Request**: Invalid request data
+- **401 Unauthorized**: Authentication required or invalid token
+- **403 Forbidden**: Insufficient permissions
 - **404 Not Found**: Resource not found
+- **409 Conflict**: Resource conflict (e.g., duplicate username/email)
 - **500 Internal Server Error**: Server error
 
 ## 🔍 Advanced Queries
@@ -588,19 +739,22 @@ All API endpoints return a consistent response format:
 ### Search Customers
 ```bash
 # Search by name, email, or phone
-curl "http://localhost:8080/api/v1/customers/search?q=john"
+curl "http://localhost:8080/api/v1/customers/search?q=john" \
+  -H "Authorization: Bearer <your_jwt_token>"
 ```
 
 ### Get Customer Orders
 ```bash
 # Get all orders for a specific customer
-curl "http://localhost:8080/api/v1/customers/customer-uuid-here/orders"
+curl "http://localhost:8080/api/v1/customers/customer-uuid-here/orders" \
+  -H "Authorization: Bearer <your_jwt_token>"
 ```
 
 ### Update Order Status
 ```bash
 # Mark order as completed
 curl -X PUT http://localhost:8080/api/v1/orders/order-uuid-here/status \
+  -H "Authorization: Bearer <your_jwt_token>" \
   -H "Content-Type: application/json" \
   -d '{"status": "completed"}'
 ```
@@ -614,6 +768,7 @@ curl -X PUT http://localhost:8080/api/v1/orders/order-uuid-here/status \
 - **Product Performance**: Most sold products
 - **Payment Analytics**: Payment method distribution
 - **Inventory Levels**: Current stock levels
+- **User Activity**: Authentication and access patterns
 
 ### Sample Queries
 ```sql
@@ -636,6 +791,12 @@ FROM customers c
 LEFT JOIN orders o ON c.id = o.customer_id
 GROUP BY c.id, c.name
 ORDER BY total_spent DESC;
+
+-- User activity by role
+SELECT u.role, COUNT(*) as login_count
+FROM users u
+WHERE u.is_active = true
+GROUP BY u.role;
 ```
 
 ## 🛠️ Development
@@ -643,6 +804,12 @@ ORDER BY total_spent DESC;
 ### Running Tests
 ```bash
 go test ./...
+```
+
+### Testing Authentication
+```bash
+# Run the authentication test script
+./test_auth.sh
 ```
 
 ### Building for Production
@@ -659,6 +826,7 @@ The application follows clean architecture principles:
 - **Services**: Business logic and validation
 - **Repository**: Data access and persistence
 - **Models**: Data structures and validation rules
+- **Middleware**: Authentication and authorization
 
 ## ⚙️ Environment Variables
 
@@ -672,6 +840,7 @@ The application follows clean architecture principles:
 | `PORT`        | Server port                  | `8080`       | No       |
 | `ENVIRONMENT` | Application environment      | `development`| No       |
 | `LOG_LEVEL`   | Logging level                | `info`       | No       |
+| `JWT_SECRET`  | JWT signing secret           | `your-secret-key` | No |
 
 ## 🤝 Contributing
 
@@ -698,14 +867,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 If you encounter any issues or have questions:
 
 1. Check the [API Documentation](http://localhost:8080/swagger/index.html)
-2. Review the [Issues](../../issues) page
-3. Create a new issue with detailed information
+2. Review the [Authentication Documentation](AUTHENTICATION.md)
+3. Review the [Issues](../../issues) page
+4. Create a new issue with detailed information
 
 ## 🔄 Upgrade from Inventory to POS
 
-This application has been upgraded from a simple inventory management system to a full-featured Point of Sales (POS) system. Here's what changed:
+This application has been upgraded from a simple inventory management system to a full-featured Point of Sales (POS) system with authentication. Here's what changed:
 
 ### What's New
+- **🔐 User Authentication**: JWT-based authentication with role-based access control
+- **👥 User Management**: Complete user administration with admin, user, and cashier roles
+- **🔒 Secure Access**: All features protected by authentication with proper authorization
 - **Customer Management**: Complete customer database with search
 - **Order Processing**: Sales order creation and management
 - **Payment Processing**: Multiple payment methods support
@@ -715,26 +888,29 @@ This application has been upgraded from a simple inventory management system to 
 
 ### Backward Compatibility
 - All existing inventory management features remain unchanged
-- Existing API endpoints continue to work as before
-- Database schema includes all original tables plus new POS tables
+- Existing API endpoints continue to work but now require authentication
+- Database schema includes all original tables plus new POS and user tables
 - No data migration required
 
 ### Migration Path
 1. **Existing Users**: Your current inventory data is preserved
-2. **New Features**: Start using customer and order management
-3. **Gradual Adoption**: Use POS features as needed
-4. **Full Integration**: Eventually integrate inventory with sales
+2. **Authentication Setup**: Register admin users to access the system
+3. **New Features**: Start using customer and order management
+4. **Gradual Adoption**: Use POS features as needed
+5. **Full Integration**: Eventually integrate inventory with sales
 
 ### Benefits of the Upgrade
-- **Complete Business Solution**: From inventory to sales
+- **Complete Business Solution**: From inventory to sales with security
+- **Secure Access**: Role-based authentication and authorization
 - **Customer Relationship Management**: Track customer history
 - **Sales Analytics**: Understand your business better
 - **Professional Receipts**: Generate proper sales receipts
 - **Payment Tracking**: Monitor cash flow and payments
 - **Audit Trail**: Complete transaction history
+- **User Management**: Multi-user support with proper access control
 
 ---
 
 **Built with ❤️ using Go, PostgreSQL, and Fiber**
 
-*Upgraded from Inventory Management to Full POS System* 
+*Upgraded from Inventory Management to Full POS System with Authentication* 

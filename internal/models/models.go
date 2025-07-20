@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -239,4 +240,59 @@ type APIResponse struct {
 	Message string      `json:"message,omitempty"`
 	Data    interface{} `json:"data,omitempty"`
 	Error   string      `json:"error,omitempty"`
+}
+
+// User represents a user in the system
+type User struct {
+	ID        uuid.UUID `json:"id" db:"id"`
+	Username  string    `json:"username" db:"username"`
+	Email     string    `json:"email" db:"email"`
+	Password  string    `json:"-" db:"password"` // "-" means this field won't be included in JSON
+	Role      string    `json:"role" db:"role"`  // "admin", "user", "cashier"
+	IsActive  bool      `json:"is_active" db:"is_active"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+}
+
+// LoginRequest represents the login request
+type LoginRequest struct {
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}
+
+// RegisterRequest represents the user registration request
+type RegisterRequest struct {
+	Username string `json:"username" validate:"required,min=3,max=50"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=6"`
+	Role     string `json:"role" validate:"required,oneof=admin user cashier"`
+}
+
+// UpdateUserRequest represents the request to update a user
+type UpdateUserRequest struct {
+	Username string `json:"username" validate:"required,min=3,max=50"`
+	Email    string `json:"email" validate:"required,email"`
+	Role     string `json:"role" validate:"required,oneof=admin user cashier"`
+	IsActive bool   `json:"is_active"`
+}
+
+// ChangePasswordRequest represents the request to change password
+type ChangePasswordRequest struct {
+	CurrentPassword string `json:"current_password" validate:"required"`
+	NewPassword     string `json:"new_password" validate:"required,min=6"`
+}
+
+// LoginResponse represents the login response with JWT token
+type LoginResponse struct {
+	Token string `json:"token"`
+	User  User   `json:"user"`
+}
+
+// Claims represents the JWT claims
+type Claims struct {
+	UserID   uuid.UUID `json:"user_id"`
+	Username string    `json:"username"`
+	Email    string    `json:"email"`
+	Role     string    `json:"role"`
+	jwt.RegisteredClaims
 }
