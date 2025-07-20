@@ -18,6 +18,7 @@ package main
 import (
 	"log"
 	"os"
+	"strings"
 
 	"jatistore/internal/config"
 	"jatistore/internal/database"
@@ -29,6 +30,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
+
+	docs "jatistore/docs"
 )
 
 func main() {
@@ -39,6 +42,9 @@ func main() {
 
 	// Initialize configuration
 	cfg := config.New()
+
+	// Dynamically set Swagger host
+	setSwaggerHost(cfg)
 
 	// Initialize database
 	db, err := database.NewConnection(cfg.DatabaseURL)
@@ -108,4 +114,25 @@ func main() {
 		}
 		os.Exit(1)
 	}
+}
+
+func setSwaggerHost(cfg *config.Config) {
+	host := ""
+	if cfg.BaseURL != "" {
+		// Remove protocol if present
+		base := cfg.BaseURL
+		if strings.HasPrefix(base, "http://") {
+			base = strings.TrimPrefix(base, "http://")
+		} else if strings.HasPrefix(base, "https://") {
+			base = strings.TrimPrefix(base, "https://")
+		}
+		// If port is not included, append it
+		if !strings.Contains(base, ":") && cfg.Port != "80" && cfg.Port != "443" {
+			base = base + ":" + cfg.Port
+		}
+		host = base
+	} else {
+		host = "localhost"
+	}
+	docs.SwaggerInfo.Host = host
 }
