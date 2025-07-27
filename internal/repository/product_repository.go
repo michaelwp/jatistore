@@ -30,12 +30,17 @@ func (r *ProductRepository) Create(product *models.Product) error {
 	product.CreatedAt = now
 	product.UpdatedAt = now
 
+	var barcodeNumber interface{}
+	if product.BarcodeNumber != nil {
+		barcodeNumber = *product.BarcodeNumber
+	}
+
 	_, err := r.db.Exec(query,
 		product.ID,
 		product.Name,
 		product.Description,
 		product.SKU,
-		product.BarcodeNumber,
+		barcodeNumber,
 		product.CategoryID,
 		product.Price,
 		product.CreatedAt,
@@ -60,13 +65,14 @@ func (r *ProductRepository) GetByID(id uuid.UUID) (*models.Product, error) {
 
 	product := &models.Product{}
 	var category models.Category
+	var barcodeNumber sql.NullString
 
 	err := r.db.QueryRow(query, id).Scan(
 		&product.ID,
 		&product.Name,
 		&product.Description,
 		&product.SKU,
-		&product.BarcodeNumber,
+		&barcodeNumber,
 		&product.CategoryID,
 		&product.Price,
 		&product.CreatedAt,
@@ -77,6 +83,10 @@ func (r *ProductRepository) GetByID(id uuid.UUID) (*models.Product, error) {
 		&category.CreatedAt,
 		&category.UpdatedAt,
 	)
+
+	if barcodeNumber.Valid {
+		product.BarcodeNumber = &barcodeNumber.String
+	}
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -108,13 +118,14 @@ func (r *ProductRepository) GetAll() ([]*models.Product, error) {
 	for rows.Next() {
 		product := &models.Product{}
 		var category models.Category
+		var barcodeNumber sql.NullString
 
 		err := rows.Scan(
 			&product.ID,
 			&product.Name,
 			&product.Description,
 			&product.SKU,
-			&product.BarcodeNumber,
+			&barcodeNumber,
 			&product.CategoryID,
 			&product.Price,
 			&product.CreatedAt,
@@ -128,6 +139,10 @@ func (r *ProductRepository) GetAll() ([]*models.Product, error) {
 
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan product: %w", err)
+		}
+
+		if barcodeNumber.Valid {
+			product.BarcodeNumber = &barcodeNumber.String
 		}
 
 		product.Category = &category
@@ -146,11 +161,16 @@ func (r *ProductRepository) Update(product *models.Product) error {
 
 	product.UpdatedAt = time.Now()
 
+	var barcodeNumber interface{}
+	if product.BarcodeNumber != nil {
+		barcodeNumber = *product.BarcodeNumber
+	}
+
 	result, err := r.db.Exec(query,
 		product.Name,
 		product.Description,
 		product.SKU,
-		product.BarcodeNumber,
+		barcodeNumber,
 		product.CategoryID,
 		product.Price,
 		product.UpdatedAt,
@@ -204,13 +224,14 @@ func (r *ProductRepository) GetBySKU(sku string) (*models.Product, error) {
 
 	product := &models.Product{}
 	var category models.Category
+	var barcodeNumber sql.NullString
 
 	err := r.db.QueryRow(query, sku).Scan(
 		&product.ID,
 		&product.Name,
 		&product.Description,
 		&product.SKU,
-		&product.BarcodeNumber,
+		&barcodeNumber,
 		&product.CategoryID,
 		&product.Price,
 		&product.CreatedAt,
@@ -221,6 +242,10 @@ func (r *ProductRepository) GetBySKU(sku string) (*models.Product, error) {
 		&category.CreatedAt,
 		&category.UpdatedAt,
 	)
+
+	if barcodeNumber.Valid {
+		product.BarcodeNumber = &barcodeNumber.String
+	}
 
 	if err != nil {
 		if err == sql.ErrNoRows {

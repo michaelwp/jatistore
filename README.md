@@ -222,6 +222,42 @@ Authorization: Bearer <jwt_token>
 - `POST /api/v1/orders/:id/receipt` - Generate receipt for an order
 - `GET /api/v1/customers/:customerId/orders` - Get orders by customer
 
+## ✨ Automatic Field Generation
+
+### SKU Generation
+When creating or updating products, if the `sku` field is not provided or is empty, the system automatically generates a unique SKU using the format:
+```
+SKU-{8-character-uuid}
+```
+Example: `SKU-a1b2c3d4`
+
+### Barcode Number Generation
+When creating or updating products, if the `barcode_number` field is not provided or is empty, the system automatically generates a unique barcode number using the format:
+```
+BC-{8-character-uuid}
+```
+Example: `BC-e5f6g7h8`
+
+### Benefits
+- **No Duplicate Errors**: Prevents duplicate key constraint violations
+- **Unique Identification**: Every product gets a unique SKU and barcode
+- **Simplified API Calls**: Optional fields make API calls easier
+- **Consistent Format**: Predictable format for generated values
+
+### Example: Creating Product Without SKU/Barcode
+```bash
+curl -X POST http://localhost:8080/api/v1/products \
+  -H "Authorization: Bearer <your_jwt_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "iPhone 15",
+    "description": "Latest iPhone model",
+    "category_id": "category-uuid-here",
+    "price": 999.99
+  }'
+```
+This will automatically generate both SKU and barcode_number.
+
 ## 🔐 Authentication & Authorization
 
 ### User Password Policy
@@ -307,8 +343,8 @@ curl -X POST http://localhost:8080/api/v1/products \
   -d '{
     "name": "iPhone 15",
     "description": "Latest iPhone model with advanced features",
-    "sku": "IPHONE-15-128GB",           # Optional
-    "barcode_number": "1234567890123",  # Optional, EAN/UPC/QR/barcode
+    "sku": "IPHONE-15-128GB",           # Optional - auto-generated if not provided
+    "barcode_number": "1234567890123",  # Optional - auto-generated if not provided
     "category_id": "category-uuid-here",
     "price": 999.99
   }'
@@ -428,8 +464,8 @@ The application automatically creates the following tables with proper relations
   - `id` (UUID): Product ID
   - `name` (string): Product name (required)
   - `description` (string): Product description
-  - `sku` (string): Stock Keeping Unit (optional, unique if provided)
-  - `barcode_number` (string): Barcode number (optional, EAN/UPC/QR/barcode)
+  - `sku` (string): Stock Keeping Unit (optional, auto-generated as "SKU-{8-char-uuid}" if not provided)
+  - `barcode_number` (string): Barcode number (optional, auto-generated as "BC-{8-char-uuid}" if not provided)
   - `category_id` (UUID): Linked category (required)
   - `price` (float): Product price (required)
   - `created_at`, `updated_at` (timestamp)
@@ -532,6 +568,7 @@ curl -X POST http://localhost:8080/api/v1/products \
     "name": "iPhone 15",
     "description": "Latest iPhone model",
     "sku": "IPHONE-15-128GB",
+    "barcode_number": "1234567890123",
     "category_id": "category-uuid-here",
     "price": 999.99
   }'

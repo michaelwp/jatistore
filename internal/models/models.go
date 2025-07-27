@@ -13,7 +13,7 @@ type Product struct {
 	Name          string    `json:"name" db:"name"`
 	Description   string    `json:"description" db:"description"`
 	SKU           string    `json:"sku" db:"sku"`
-	BarcodeNumber string    `json:"barcode_number" db:"barcode_number"`
+	BarcodeNumber *string   `json:"barcode_number" db:"barcode_number"`
 	CategoryID    uuid.UUID `json:"category_id" db:"category_id"`
 	Price         float64   `json:"price" db:"price"`
 	CreatedAt     time.Time `json:"created_at" db:"created_at"`
