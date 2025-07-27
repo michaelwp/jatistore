@@ -832,6 +832,12 @@ paths:
       consumes:
       - application/json
       description: Get a list of all categories
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -850,6 +856,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get all categories
       tags:
       - Categories
@@ -858,6 +866,11 @@ paths:
       - application/json
       description: Create a new category with the provided data
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Category data
         in: body
         name: category
@@ -884,6 +897,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Create a new category
       tags:
       - Categories
@@ -893,6 +908,11 @@ paths:
       - application/json
       description: Delete a category by its ID
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Category ID
         in: path
         name: id
@@ -913,6 +933,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Delete a category
       tags:
       - Categories
@@ -921,6 +943,11 @@ paths:
       - application/json
       description: Get a category by its unique identifier
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Category ID
         in: path
         name: id
@@ -946,6 +973,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get category by ID
       tags:
       - Categories
@@ -954,6 +983,11 @@ paths:
       - application/json
       description: Update a category with the provided data
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Category ID
         in: path
         name: id
@@ -985,12 +1019,20 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Update a category
       tags:
       - Categories
   /customers:
     get:
       description: Get a list of all customers
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1009,6 +1051,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get all customers
       tags:
       - customers
@@ -1017,6 +1061,11 @@ paths:
       - application/json
       description: Create a new customer with the provided information
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Customer information
         in: body
         name: customer
@@ -1043,6 +1092,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Create a new customer
       tags:
       - customers
@@ -1050,6 +1101,11 @@ paths:
     get:
       description: Get all orders for a specific customer
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Customer ID
         in: path
         name: customerId
@@ -1077,6 +1133,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get orders by customer
       tags:
       - orders
@@ -1084,6 +1142,11 @@ paths:
     delete:
       description: Delete a customer by ID
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Customer ID
         in: path
         name: id
@@ -1108,12 +1171,19 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Delete a customer
       tags:
       - customers
     get:
       description: Get customer details by customer ID
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Customer ID
         in: path
         name: id
@@ -1143,6 +1213,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get a customer by ID
       tags:
       - customers
@@ -1151,6 +1223,11 @@ paths:
       - application/json
       description: Update customer information by ID
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Customer ID
         in: path
         name: id
@@ -1186,6 +1263,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Update a customer
       tags:
       - customers
@@ -1193,6 +1272,11 @@ paths:
     get:
       description: Search customers by name, email, or phone
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Search query
         in: query
         name: q
@@ -1215,6 +1299,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Search customers
       tags:
       - customers
@@ -1223,6 +1309,12 @@ paths:
       consumes:
       - application/json
       description: Get a list of all inventory records
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1241,6 +1333,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get all inventory records
       tags:
       - Inventory
@@ -1249,6 +1343,11 @@ paths:
       - application/json
       description: Create a new inventory record with the provided data
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Inventory data
         in: body
         name: inventory
@@ -1275,6 +1374,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Create a new inventory record
       tags:
       - Inventory
@@ -1284,6 +1385,11 @@ paths:
       - application/json
       description: Delete an inventory record by its ID
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Inventory ID
         in: path
         name: id
@@ -1304,6 +1410,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Delete an inventory record
       tags:
       - Inventory
@@ -1312,6 +1420,11 @@ paths:
       - application/json
       description: Get an inventory record by its unique identifier
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Inventory ID
         in: path
         name: id
@@ -1337,6 +1450,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get inventory by ID
       tags:
       - Inventory
@@ -1345,6 +1460,11 @@ paths:
       - application/json
       description: Update an inventory record with the provided data
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Inventory ID
         in: path
         name: id
@@ -1376,6 +1496,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Update an inventory record
       tags:
       - Inventory
@@ -1385,6 +1507,11 @@ paths:
       - application/json
       description: Adjust inventory stock levels (in/out/adjustment)
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Stock adjustment data
         in: body
         name: adjustment
@@ -1411,12 +1538,20 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Adjust inventory stock
       tags:
       - Inventory
   /orders:
     get:
       description: Get a list of all orders
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1435,6 +1570,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get all orders
       tags:
       - orders
@@ -1443,6 +1580,11 @@ paths:
       - application/json
       description: Create a new sales order with items
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Order information
         in: body
         name: order
@@ -1469,6 +1611,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Create a new order
       tags:
       - orders
@@ -1476,6 +1620,11 @@ paths:
     get:
       description: Get order details by order ID
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Order ID
         in: path
         name: id
@@ -1505,6 +1654,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get an order by ID
       tags:
       - orders
@@ -1514,6 +1665,11 @@ paths:
       - application/json
       description: Process a payment for an order
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Order ID
         in: path
         name: id
@@ -1549,6 +1705,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Process payment for an order
       tags:
       - orders
@@ -1556,6 +1714,11 @@ paths:
     post:
       description: Generate a receipt for a paid order
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Order ID
         in: path
         name: id
@@ -1585,6 +1748,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Generate receipt for an order
       tags:
       - orders
@@ -1594,6 +1759,11 @@ paths:
       - application/json
       description: Update the status of an order
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Order ID
         in: path
         name: id
@@ -1626,6 +1796,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Update order status
       tags:
       - orders
@@ -1634,6 +1806,12 @@ paths:
       consumes:
       - application/json
       description: Get a list of all products
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1652,6 +1830,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get all products
       tags:
       - Products
@@ -1660,6 +1840,11 @@ paths:
       - application/json
       description: Create a new product with the provided data
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Product data
         in: body
         name: product
@@ -1686,6 +1871,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Create a new product
       tags:
       - Products
@@ -1695,6 +1882,11 @@ paths:
       - application/json
       description: Delete a product by its ID
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Product ID
         in: path
         name: id
@@ -1715,6 +1907,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Delete a product
       tags:
       - Products
@@ -1723,6 +1917,11 @@ paths:
       - application/json
       description: Get a product by its unique identifier
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Product ID
         in: path
         name: id
@@ -1748,6 +1947,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Get product by ID
       tags:
       - Products
@@ -1756,6 +1957,11 @@ paths:
       - application/json
       description: Update a product with the provided data
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Product ID
         in: path
         name: id
@@ -1787,6 +1993,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.APIResponse'
+      security:
+      - BearerAuth: []
       summary: Update a product
       tags:
       - Products

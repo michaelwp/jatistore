@@ -23,6 +23,8 @@ func NewInventoryHandler(inventoryService *services.InventoryService) *Inventory
 // @Tags Inventory
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param inventory body models.CreateInventoryRequest true "Inventory data"
 // @Success 201 {object} models.APIResponse{data=models.Inventory}
 // @Failure 400 {object} models.APIResponse
@@ -81,6 +83,8 @@ func (h *InventoryHandler) CreateInventory(c *fiber.Ctx) error {
 // @Tags Inventory
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Inventory ID"
 // @Success 200 {object} models.APIResponse{data=models.Inventory}
 // @Failure 400 {object} models.APIResponse
@@ -115,6 +119,8 @@ func (h *InventoryHandler) GetInventoryByID(c *fiber.Ctx) error {
 // @Tags Inventory
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Success 200 {object} models.APIResponse{data=[]models.Inventory}
 // @Failure 500 {object} models.APIResponse
 // @Router /inventory [get]
@@ -139,6 +145,8 @@ func (h *InventoryHandler) GetAllInventory(c *fiber.Ctx) error {
 // @Tags Inventory
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Inventory ID"
 // @Param inventory body models.UpdateInventoryRequest true "Updated inventory data"
 // @Success 200 {object} models.APIResponse{data=models.Inventory}
@@ -199,6 +207,8 @@ func (h *InventoryHandler) UpdateInventory(c *fiber.Ctx) error {
 // @Tags Inventory
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Inventory ID"
 // @Success 200 {object} models.APIResponse
 // @Failure 400 {object} models.APIResponse
@@ -233,6 +243,8 @@ func (h *InventoryHandler) DeleteInventory(c *fiber.Ctx) error {
 // @Tags Inventory
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param adjustment body models.AdjustStockRequest true "Stock adjustment data"
 // @Success 200 {object} models.APIResponse{data=models.InventoryTransaction}
 // @Failure 400 {object} models.APIResponse

@@ -23,6 +23,8 @@ func NewCategoryHandler(categoryService *services.CategoryService) *CategoryHand
 // @Tags Categories
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param category body models.CreateCategoryRequest true "Category data"
 // @Success 201 {object} models.APIResponse{data=models.Category}
 // @Failure 400 {object} models.APIResponse
@@ -67,6 +69,8 @@ func (h *CategoryHandler) CreateCategory(c *fiber.Ctx) error {
 // @Tags Categories
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Category ID"
 // @Success 200 {object} models.APIResponse{data=models.Category}
 // @Failure 400 {object} models.APIResponse
@@ -104,6 +108,8 @@ func (h *CategoryHandler) GetCategoryByID(c *fiber.Ctx) error {
 // @Success 200 {object} models.APIResponse{data=[]models.Category}
 // @Failure 500 {object} models.APIResponse
 // @Router /categories [get]
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"  // <-- required header
 func (h *CategoryHandler) GetAllCategories(c *fiber.Ctx) error {
 	categories, err := h.categoryService.GetAllCategories()
 	if err != nil {
@@ -125,6 +131,8 @@ func (h *CategoryHandler) GetAllCategories(c *fiber.Ctx) error {
 // @Tags Categories
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Category ID"
 // @Param category body models.UpdateCategoryRequest true "Updated category data"
 // @Success 200 {object} models.APIResponse{data=models.Category}
@@ -178,6 +186,8 @@ func (h *CategoryHandler) UpdateCategory(c *fiber.Ctx) error {
 // @Tags Categories
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Category ID"
 // @Success 200 {object} models.APIResponse
 // @Failure 400 {object} models.APIResponse

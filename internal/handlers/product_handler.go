@@ -23,6 +23,8 @@ func NewProductHandler(productService *services.ProductService) *ProductHandler 
 // @Tags Products
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param product body models.CreateProductRequest true "Product data"
 // @Success 201 {object} models.APIResponse{data=models.Product}
 // @Failure 400 {object} models.APIResponse
@@ -81,6 +83,8 @@ func (h *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 // @Tags Products
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Product ID"
 // @Success 200 {object} models.APIResponse{data=models.Product}
 // @Failure 400 {object} models.APIResponse
@@ -115,6 +119,8 @@ func (h *ProductHandler) GetProductByID(c *fiber.Ctx) error {
 // @Tags Products
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Success 200 {object} models.APIResponse{data=[]models.Product}
 // @Failure 500 {object} models.APIResponse
 // @Router /products [get]
@@ -139,6 +145,8 @@ func (h *ProductHandler) GetAllProducts(c *fiber.Ctx) error {
 // @Tags Products
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Product ID"
 // @Param product body models.UpdateProductRequest true "Updated product data"
 // @Success 200 {object} models.APIResponse{data=models.Product}
@@ -206,6 +214,8 @@ func (h *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 // @Tags Products
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Product ID"
 // @Success 200 {object} models.APIResponse
 // @Failure 400 {object} models.APIResponse
