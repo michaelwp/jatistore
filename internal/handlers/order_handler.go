@@ -30,6 +30,8 @@ func NewOrderHandler(orderService *services.OrderService) *OrderHandler {
 // @Tags orders
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param order body models.CreateOrderRequest true "Order information"
 // @Success 201 {object} models.APIResponse{data=models.Order}
 // @Failure 400 {object} models.APIResponse
@@ -102,6 +104,8 @@ func (h *OrderHandler) CreateOrder(c *fiber.Ctx) error {
 // @Description Get order details by order ID
 // @Tags orders
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Order ID"
 // @Success 200 {object} models.APIResponse{data=models.Order}
 // @Failure 400 {object} models.APIResponse
@@ -142,6 +146,8 @@ func (h *OrderHandler) GetOrder(c *fiber.Ctx) error {
 // @Description Get a list of all orders
 // @Tags orders
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Success 200 {object} models.APIResponse{data=[]models.Order}
 // @Failure 500 {object} models.APIResponse
 // @Router /orders [get]
@@ -166,6 +172,8 @@ func (h *OrderHandler) GetAllOrders(c *fiber.Ctx) error {
 // @Tags orders
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Order ID"
 // @Param status body map[string]string true "Order status"
 // @Success 200 {object} models.APIResponse
@@ -224,6 +232,8 @@ func (h *OrderHandler) UpdateOrderStatus(c *fiber.Ctx) error {
 // @Tags orders
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Order ID"
 // @Param payment body models.CreatePaymentRequest true "Payment information"
 // @Success 200 {object} models.APIResponse{data=models.Payment}
@@ -296,6 +306,8 @@ func (h *OrderHandler) ProcessPayment(c *fiber.Ctx) error {
 // @Description Generate a receipt for a paid order
 // @Tags orders
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Order ID"
 // @Success 200 {object} models.APIResponse{data=models.Receipt}
 // @Failure 400 {object} models.APIResponse
@@ -337,6 +349,8 @@ func (h *OrderHandler) GenerateReceipt(c *fiber.Ctx) error {
 // @Description Get all orders for a specific customer
 // @Tags orders
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param customerId path string true "Customer ID"
 // @Success 200 {object} models.APIResponse{data=[]models.Order}
 // @Failure 400 {object} models.APIResponse

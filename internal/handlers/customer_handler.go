@@ -30,6 +30,8 @@ func NewCustomerHandler(customerService *services.CustomerService) *CustomerHand
 // @Tags customers
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param customer body models.CreateCustomerRequest true "Customer information"
 // @Success 201 {object} models.APIResponse{data=models.Customer}
 // @Failure 400 {object} models.APIResponse
@@ -79,6 +81,8 @@ func (h *CustomerHandler) CreateCustomer(c *fiber.Ctx) error {
 // @Description Get customer details by customer ID
 // @Tags customers
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Customer ID"
 // @Success 200 {object} models.APIResponse{data=models.Customer}
 // @Failure 400 {object} models.APIResponse
@@ -119,6 +123,8 @@ func (h *CustomerHandler) GetCustomer(c *fiber.Ctx) error {
 // @Description Get a list of all customers
 // @Tags customers
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Success 200 {object} models.APIResponse{data=[]models.Customer}
 // @Failure 500 {object} models.APIResponse
 // @Router /customers [get]
@@ -143,6 +149,8 @@ func (h *CustomerHandler) GetAllCustomers(c *fiber.Ctx) error {
 // @Tags customers
 // @Accept json
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Customer ID"
 // @Param customer body models.UpdateCustomerRequest true "Updated customer information"
 // @Success 200 {object} models.APIResponse{data=models.Customer}
@@ -208,6 +216,8 @@ func (h *CustomerHandler) UpdateCustomer(c *fiber.Ctx) error {
 // @Description Delete a customer by ID
 // @Tags customers
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param id path string true "Customer ID"
 // @Success 200 {object} models.APIResponse
 // @Failure 400 {object} models.APIResponse
@@ -248,6 +258,8 @@ func (h *CustomerHandler) DeleteCustomer(c *fiber.Ctx) error {
 // @Description Search customers by name, email, or phone
 // @Tags customers
 // @Produce json
+// @Security BearerAuth
+// @Param Authorization header string true "Bearer token"
 // @Param q query string false "Search query"
 // @Success 200 {object} models.APIResponse{data=[]models.Customer}
 // @Failure 500 {object} models.APIResponse

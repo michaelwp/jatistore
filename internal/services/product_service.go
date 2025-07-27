@@ -26,19 +26,31 @@ func (s *ProductService) CreateProduct(req *models.CreateProductRequest) (*model
 		return nil, fmt.Errorf("invalid category ID: %w", err)
 	}
 
-	// Check if SKU already exists (only if SKU is provided)
-	if req.SKU != "" {
-		existingProduct, _ := s.productRepo.GetBySKU(req.SKU)
-		if existingProduct != nil {
-			return nil, fmt.Errorf("product with SKU %s already exists", req.SKU)
-		}
+	// Generate SKU if not provided
+	sku := req.SKU
+	if sku == "" {
+		sku = fmt.Sprintf("SKU-%s", uuid.New().String()[:8])
+	}
+
+	// Check if SKU already exists
+	existingProduct, _ := s.productRepo.GetBySKU(sku)
+	if existingProduct != nil {
+		return nil, fmt.Errorf("product with SKU %s already exists", sku)
+	}
+
+	var barcodeNumber *string
+	if req.BarcodeNumber != "" {
+		barcodeNumber = &req.BarcodeNumber
+	} else {
+		uniqueBarcode := fmt.Sprintf("BC-%s", uuid.New().String()[:8])
+		barcodeNumber = &uniqueBarcode
 	}
 
 	product := &models.Product{
 		Name:          req.Name,
 		Description:   req.Description,
-		SKU:           req.SKU,
-		BarcodeNumber: req.BarcodeNumber,
+		SKU:           sku,
+		BarcodeNumber: barcodeNumber,
 		CategoryID:    categoryID,
 		Price:         req.Price,
 	}
@@ -97,19 +109,34 @@ func (s *ProductService) UpdateProduct(id string, req *models.UpdateProductReque
 		return nil, fmt.Errorf("failed to get existing product: %w", err)
 	}
 
-	// Check if SKU is being changed and if it already exists (only if SKU is provided)
-	if req.SKU != "" && existingProduct.SKU != req.SKU {
-		productWithSKU, _ := s.productRepo.GetBySKU(req.SKU)
+	// Handle SKU update
+	sku := req.SKU
+	if sku == "" {
+		sku = fmt.Sprintf("SKU-%s", uuid.New().String()[:8])
+	}
+
+	// Check if SKU is being changed and if it already exists
+	if existingProduct.SKU != sku {
+		productWithSKU, _ := s.productRepo.GetBySKU(sku)
 		if productWithSKU != nil && productWithSKU.ID != productID {
-			return nil, fmt.Errorf("product with SKU %s already exists", req.SKU)
+			return nil, fmt.Errorf("product with SKU %s already exists", sku)
 		}
 	}
 
 	// Update product fields
 	existingProduct.Name = req.Name
 	existingProduct.Description = req.Description
-	existingProduct.SKU = req.SKU
-	existingProduct.BarcodeNumber = req.BarcodeNumber
+	existingProduct.SKU = sku
+	
+	var barcodeNumber *string
+	if req.BarcodeNumber != "" {
+		barcodeNumber = &req.BarcodeNumber
+	} else {
+		uniqueBarcode := fmt.Sprintf("BC-%s", uuid.New().String()[:8])
+		barcodeNumber = &uniqueBarcode
+	}
+	existingProduct.BarcodeNumber = barcodeNumber
+	
 	existingProduct.CategoryID = categoryID
 	existingProduct.Price = req.Price
 
